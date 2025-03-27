@@ -1,6 +1,7 @@
 ////////////////////////////////
 // Setup
 ////////////////////////////////
+console.log("👀 Gulpfile loading...");
 
 // Gulp
 import gulp from "gulp"
@@ -8,8 +9,7 @@ const { src, dest, parallel, series, watch, lastRun } = gulp
 
 // Package
 import { readFile } from "node:fs/promises";
-const pjson = JSON.parse(await readFile('./package.json'))
-
+import pjson from './package.json' with { type: "json" };
 // Plugins
 import autoprefixer from 'autoprefixer'
 import browserify from 'browserify'
@@ -173,9 +173,9 @@ function js() {
         .pipe(sourcemaps.init())
         .pipe(tap(function (file) {
             file.contents = browserify(file.path, { debug: true })
-                .transform(babelify, { 
-                    // Some node modules are switching to ES modules, 
-                    // browserify is not compatible with ES modules, 
+                .transform(babelify, {
+                    // Some node modules are switching to ES modules,
+                    // browserify is not compatible with ES modules,
                     // so transpile such node modules in the meantime.
                     // New modules can be written in ES2015+, making jQuery obsolete
                     // and supporting older browsers easier.
@@ -183,9 +183,9 @@ function js() {
                     // a more actively supported (and ES + CJS module supporting) tool,
                     // (i.e. rollup, webpack, vite, etc.) to prevent transpiling dependencies.
                     presets: [
-                        "@babel/preset-env", {"sourceType": "unambiguous"} 
+                        "@babel/preset-env", {"sourceType": "unambiguous"}
                         // If no exports or imports, assume file is script.
-                    ], 
+                    ],
                     global: true,
                     ignore: [/\/node_modules\/(?!three\/)/] // Only transpile three.js (to be safe).
                 })                                          // Can add other node_modules if/when they break...
@@ -240,10 +240,10 @@ function files() {
 
 // Watch
 function watchPaths() {
-    watch([`${paths.js_source}**/*.js`], js).on("change", reload)
-    watch([`${paths.css_source}/*/*.css`], css).on("change", reload)
-    watch([`${paths.scss_source}**/*.scss`], scss).on("change", reload)
-    watch([`${paths.images_source}**/*`], img).on("change", reload)
+    watch([`${paths.js_source}/**/*.js`], js).on("change", bs.reload);
+    watch([`${paths.scss_source}/**/*.scss`], scss).on("change", bs.reload);
+    watch([`${paths.css_source}/**/*.css`], css).on("change", bs.reload);
+    watch([`${paths.images_source}/**/*`], img).on("change", bs.reload);
 }
 
 // Generate all assets
@@ -261,11 +261,17 @@ export const generateAssets = series(
 )
 generateAssets.displayName = "generate-assets";
 
-export const dev = parallel(
-    // initBrowserSync,
-    watchPaths
-)
-
 // TODO: Look at cleaning build folder
+//
+function initBrowserSync(done) {
+    bs.init({
+        proxy: 'http://localhost:8000', // your Django dev server
+        port: 3000,
+        open: false, // don’t auto-open browser unless you want it to
+        notify: false, // remove “BrowserSync Connected” overlay
+    });
+    done();
+}
 
+export const dev = series(initBrowserSync, watchPaths);
 export default series(generateAssets, dev);
