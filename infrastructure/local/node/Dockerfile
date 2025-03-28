@@ -3,6 +3,11 @@ FROM node:20-bookworm
 ARG DOCKER_UID=1000
 RUN usermod -u $DOCKER_UID node
 
+
+# Avoid native Rollup bindings issues
+ENV ROLLUP_NO_BINARY=true
+ENV ROLLUP_NO_NATIVE=true
+
 # Install required system dependencies
 RUN apt-get update && apt-get install --no-install-recommends -y \
     build-essential \

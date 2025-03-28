@@ -38,45 +38,13 @@ services:
                 DOCKER_UID: ${DOCKER_UID}
         image: cs_field_guide_local_node
         volumes:
-            # https://burnedikt.com/dockerized-node-development-and-mounting-node-volumes/#exclude-node_modules-from-the-mount
-            - ./csfieldguide/package.json:/app/package.json:z
-            - ./csfieldguide/package-lock.json:/app/package-lock.json:z
-            - ./csfieldguide/gulpfile.mjs:/app/gulpfile.mjs:z
-            - ./csfieldguide/static:/app/static:z
-            - ./csfieldguide/build:/app/build:z
-            - /app/static/interactives/algorithm-timer/node_modules/
-            - /app/static/interactives/big-number-calculator/node_modules/
-            - /app/static/interactives/bin-packing/node_modules/
-            - /app/static/js/translation-rotation-interactives/node_modules/
-            - /app/static/interactives/caesar-cipher/node_modules/
-            - /app/static/interactives/city-trip/node_modules/
-            - /app/static/interactives/cmy-mixer/node_modules/
-            - /app/static/interactives/colour-matcher/node_modules/
-            - /app/static/interactives/data-bias/node_modules/
-            - /app/static/interactives/data-visualisation/node_modules/
-            - /app/static/interactives/frequency-analysis/node_modules/
-            - /app/static/interactives/jpeg-compression/node_modules/
-            - /app/static/interactives/matrix-simplifier/node_modules/
-            - /app/static/interactives/packet-attack/node_modules/
-            - /app/static/interactives/password-guesser/node_modules/
-            - /app/static/interactives/product-code-check-digit-calculation/node_modules/
-            - /app/static/interactives/python-interpreter/node_modules/
-            - /app/static/interactives/qr-code-generator/node_modules/
-            - /app/static/interactives/rgb-mixer/node_modules/
-            - /app/static/interactives/rsa-decryption/node_modules/
-            - /app/static/interactives/rsa-encryption/node_modules/
-            - /app/static/interactives/rsa-key-generator/node_modules/
-            - /app/static/interactives/scene-editor/node_modules/
-            - /app/static/interactives/sha2/node_modules/
-            - /app/static/interactives/shannon-experiment/node_modules/
-            - /app/static/interactives/sorting-algorithms/node_modules/
-            - /app/static/interactives/training-ground/node_modules/
-            - /app/static/interactives/unicode-binary/node_modules/
-            - /app/static/interactives/unicode-chars/node_modules/
-            - /app/static/interactives/viola-jones-face-detector/node_modules/
+            - ./csfieldguide:/app:z
         command: npm run dev
         networks:
             - backend
+        environment:
+            - ROLLUP_NO_BINARY=true
+            - ROLLUP_NO_NATIVE=true
 
     puppeteer:
         image: buildkite/puppeteer:10.0.0
@@ -106,8 +74,8 @@ services:
         image: ghcr.io/uccser/local-docs-image:latest
         volumes:
             - ./docs:/docs:z
-        networks:
-            - uccser-development-stack
+            # networks:
+            # - uccser-development-stack
         labels:
             # General labels
             - "traefik.enable=true"

@@ -69,7 +69,7 @@ $(document).ready(function() {
     $('#assembled-input').val('');
     $('#program-output').html('');
     var offerExamples = urlParameters.getUrlParameter('offer-examples');
-    
+
     $('#run-mips').on('click', function () {
         try {
             run();
@@ -341,7 +341,7 @@ function execute(type, args, addr) {
 function interpret(hex) {
     var name;
     var type;
-    var arguments;
+    var args;
     var executables;
     var returnText = "";
     // Type I and Type J opcodes are in the first 6 bits
@@ -350,7 +350,7 @@ function interpret(hex) {
         // The Type R opcode is in the last 6 bits
         type = TYPE_R;
         opcode = 0x0000003F & hex;
-        arguments = disassembleR(hex);
+        args = disassembleR(hex);
         name = operation(TYPE_R, opcode);
         if (name == TYPE_UNSUPPORTED) {
             return [type, TYPE_UNSUPPORTED, null];
@@ -358,47 +358,47 @@ function interpret(hex) {
         if (name == "sll") {
             // Interpret as the supported shift operation
             // sll $dest, $operand, shift
-            executables = [name, arguments[3], arguments[2], arguments[4]];
+            executables = [name, args[3], args[2], args[4]];
             returnText = name + " $" + REG_NAMES[executables[1]] + ", $" + REG_NAMES[executables[2]] + ", " + executables[3];
         } else if (name == "jr"){
             // Interpret as the supported jump register operation
             // jr $dest
-            executables = [name, arguments[1]];
+            executables = [name, args[1]];
             returnText = name + " $" + REG_NAMES[executables[1]];
         } else {
             // Interpret as a standard Type R instruction
             // name $dest, $operand1, $operand2
-            executables = [name, arguments[3], arguments[1], arguments[2]];
+            executables = [name, args[3], args[1], args[2]];
             returnText = name + " $" + REG_NAMES[executables[1]] + ", $" + REG_NAMES[executables[2]] + ", $" + REG_NAMES[executables[3]];
         }
 
     } else if (opcode == 2) {
         // The only supported Type J opcode is for the 'j' operation
         type = TYPE_J;
-        arguments = disassembleJ(hex);
-        name = operation(TYPE_J, arguments[0]);
+        args = disassembleJ(hex);
+        name = operation(TYPE_J, args[0]);
         if (name == TYPE_UNSUPPORTED) {
             return [type, TYPE_UNSUPPORTED, null];
         }
-        executables = [name, arguments[1]];
+        executables = [name, args[1]];
         returnText = name + " " + hexOfInt(executables[1], 8);
 
     } else if ([4, 5, 8, 9, 12, 13, 14].includes(opcode)) {
         type = TYPE_I;
-        arguments = disassembleI(hex);
-        name = operation(TYPE_I, arguments[0]);
+        args = disassembleI(hex);
+        name = operation(TYPE_I, args[0]);
         if (name == TYPE_UNSUPPORTED) {
             return [type, TYPE_UNSUPPORTED, null];
         }
         if (name == "beq" || name == "bne") {
             // Interpret as one of the supported branch operations
             // name $operand1, $operand2, [num instructions skipped]
-            executables = [name, arguments[1], arguments[2], arguments[3]];
+            executables = [name, args[1], args[2], args[3]];
             returnText = name + " $" + REG_NAMES[executables[1]] + ", $" + REG_NAMES[executables[2]] + ", " + executables[3];
         } else {
             // Interpret as a standard Type I instruction
             // name $dest, $operand, immediate
-            executables = [name, arguments[2], arguments[1], arguments[3]];
+            executables = [name, args[2], args[1], args[3]];
             returnText = name + " $" + REG_NAMES[executables[1]] + ", $" + REG_NAMES[executables[2]] + ", " + executables[3];
         }
 
@@ -509,7 +509,7 @@ function operation(type, opcode) {
  */
 function execute_sll (args, addr) {
     // sll $dest, $op1, shift
-    
+
     var dest = args[1];
     var op = args[2];
     var shift = args[3];
@@ -549,7 +549,7 @@ function execute_jr (args, addr) {
  */
 function execute_add (args, addr) {
     // add $dest, $op1, $op2
-    
+
     var dest = args[1];
     var op1 = args[2];
     var op2 = args[3];
@@ -575,7 +575,7 @@ function execute_add (args, addr) {
  */
 function execute_addu (args, addr) {
     // addu $dest, $op1, $op2
-        
+
     var dest = args[1];
     var op1 = args[2];
     var op2 = args[3];
@@ -601,7 +601,7 @@ function execute_addu (args, addr) {
  */
 function execute_sub (args, addr) {
     // sub $dest, $op1, $op2
-    
+
     var dest = args[1];
     var op1 = args[2];
     var op2 = args[3];
@@ -627,7 +627,7 @@ function execute_sub (args, addr) {
  */
 function execute_subu (args, addr) {
     // subu $dest, $op1, $op2
-    
+
     var dest = args[1];
     var op1 = args[2];
     var op2 = args[3];
@@ -653,7 +653,7 @@ function execute_subu (args, addr) {
  */
 function execute_and (args, addr) {
     // and $dest, $op1, $op2
-        
+
     var dest = args[1];
     var op1 = args[2];
     var op2 = args[3];
@@ -679,7 +679,7 @@ function execute_and (args, addr) {
  */
 function execute_or (args, addr) {
     // or $dest, $op1, $op2
-        
+
     var dest = args[1];
     var op1 = args[2];
     var op2 = args[3];
@@ -705,7 +705,7 @@ function execute_or (args, addr) {
  */
 function execute_xor (args, addr) {
     // xor $dest, $op1, $op2
-        
+
     var dest = args[1];
     var op1 = args[2];
     var op2 = args[3];
@@ -731,7 +731,7 @@ function execute_xor (args, addr) {
  */
 function execute_nor (args, addr) {
     // nor $dest, $op1, $op2
-        
+
     var dest = args[1];
     var op1 = args[2];
     var op2 = args[3];
@@ -757,7 +757,7 @@ function execute_nor (args, addr) {
  */
 function execute_beq (args, addr) {
     // beq $op1, $op2, [num instructions to skip]
-    
+
     var op1 = args[1];
     var op2 = args[2];
     var skips = args[3];
@@ -769,7 +769,7 @@ function execute_beq (args, addr) {
         PRINTTEXT += colour(TXT_NOREAD + ": $" + REG_NAMES[op2], COLOUR_BAD) + "<br>";
         return -1;
     }
-    
+
     if (REGISTERS[op1] == REGISTERS[op2]) {
         if (SHOWREG) {
             PRINTTEXT += colour("beq", COLOUR_INSTR) + ": " + colour("$" + REG_NAMES[op1], COLOUR_INSTR) + " " + colour("[" + hexOfInt(REGISTERS[op1], 8) + "]", COLOUR_REG) + " " + colour("== $" + REG_NAMES[op2], COLOUR_INSTR) + " " + colour("[" + hexOfInt(REGISTERS[op2], 8) + "]", COLOUR_REG) + " : " + colour(TXT_BRANCH, COLOUR_ANS) + "<br>";
@@ -789,7 +789,7 @@ function execute_beq (args, addr) {
  */
 function execute_bne (args, addr) {
     // bne $op1, $op2, [num instructions to skip]
-        
+
     var op1 = args[1];
     var op2 = args[2];
     var skips = args[3];
@@ -801,7 +801,7 @@ function execute_bne (args, addr) {
         PRINTTEXT += colour(TXT_NOREAD + ": $" + REG_NAMES[op2], COLOUR_BAD) + "<br>";
         return -1;
     }
-    
+
     if (REGISTERS[op1] != REGISTERS[op2]) {
         if (SHOWREG) {
             PRINTTEXT += colour("bne", COLOUR_INSTR) + ": " + colour("$" + REG_NAMES[op1], COLOUR_INSTR) + " " + colour("[" + hexOfInt(REGISTERS[op1], 8) + "]", COLOUR_REG) + " " + colour("!= $" + REG_NAMES[op2], COLOUR_INSTR) + " " + colour("[" + hexOfInt(REGISTERS[op2], 8) + "]", COLOUR_REG) + " : " + colour(TXT_BRANCH, COLOUR_ANS) + "<br>";
@@ -1005,7 +1005,7 @@ function interpretString(addr) {
             lineHex = nextData[1];
             chars = disect(lineHex);
         }
-        
+
     }
     return returnText;
 }
